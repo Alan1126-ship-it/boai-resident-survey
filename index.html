@@ -111,6 +111,12 @@
       padding: 10px 12px; border-radius: 10px; border: 1px solid #e7ddce; cursor: pointer; font-size: 0.92rem; font-weight: 600;
     }
 
+    /* 舊版折疊展開樣式 */
+    .expand-item-wrap { background: #faf7f2; border: 1px solid #ebd9c2; border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; }
+    .expand-item-header { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.93rem; font-weight: 600; }
+    .expand-desc-box { display: none; margin-top: 10px; padding-left: 24px; }
+    .expand-desc-box input { background: #fff; border: 1px dashed var(--accent-skyblue); }
+
     .photo-grid-stream { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
     .photo-thumb-wrap {
       border: 1px solid #dcd1c2; border-radius: 8px; padding: 5px; background: #fff; position: relative;
@@ -270,46 +276,88 @@
       </div>
     </div>
 
-    <!-- 2. 歷史受災與工程成效 -->
+    <!-- 2. 歷史受災與現場衝擊 (已移入舊版點選展開項目) -->
     <div class="panel-card">
-      <div class="panel-title">■ 歷史受災過程與水保治理成效感受</div>
+      <div class="panel-title">■ 歷史受災過程與受災陳述</div>
 
       <div class="form-group">
         <label>歷次重大災害經歷：</label>
         <div class="choice-grid">
-          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="88年 921集集地震"> 88年 921地震</label>
+          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="88年 921地震"> 88年 921地震</label>
           <label class="choice-item"><input type="checkbox" name="chk_disaster" value="90年 桃芝颱風"> 90年 桃芝颱風</label>
-          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="93年 七二水災(敏督利)"> 93年 七二敏督利</label>
+          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="93年 敏督利颱風(七二水災)"> 93年 七二敏督利</label>
           <label class="choice-item"><input type="checkbox" name="chk_disaster" value="98年 莫拉克颱風"> 98年 莫拉克颱風</label>
-          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="近年強降雨"> 近年強降雨/豪雨</label>
-          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="無明顯受災"> 無明顯受災</label>
+          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="近年重大豪雨事件"> 近年強降雨/豪雨</label>
+          <label class="choice-item"><input type="checkbox" name="chk_disaster" value="從未經歷顯著災害"> 從未經歷顯著災害</label>
         </div>
         <input type="text" id="disasterNote" placeholder="重大事件歷程補充" style="margin-top:6px;">
       </div>
 
+      <!-- 移植自舊版：可點選展開的衝擊細項 -->
       <div class="form-group">
-        <label>受災與現場衝擊陳述：</label>
-        <div class="choice-grid">
-          <label class="choice-item"><input type="checkbox" name="chk_impact" value="土石泥流漫淹入室"> 土石泥流漫淹入室</label>
-          <label class="choice-item"><input type="checkbox" name="chk_impact" value="建物結構受損龜裂"> 建物結構受損龜裂</label>
-          <label class="choice-item"><input type="checkbox" name="chk_impact" value="農地作物沖毀流失"> 農地作物沖毀流失</label>
-          <label class="choice-item"><input type="checkbox" name="chk_impact" value="聯外道路中斷受困"> 聯外道路中斷受困</label>
-          <label class="choice-item"><input type="checkbox" name="chk_impact" value="曾配合疏散避難撤離"> 曾配合預防性疏散撤離</label>
+        <label>歷次受災情況與現場衝擊項目（點選展開詳細數據）：</label>
+        <div class="expand-item-wrap">
+          <label class="expand-item-header">
+            <input type="checkbox" name="chk_impact" value="土砂溢淹與淤積" onchange="toggleDescBox(this, 'box_impact_sand')">
+            <span>1. 土砂溢淹與淤積狀況</span>
+          </label>
+          <div class="expand-desc-box" id="box_impact_sand">
+            <input type="text" id="note_impact_sand" placeholder="描述：庭院泥流約__公分，或土石進室內__公尺 (無則填無)">
+          </div>
+        </div>
+        <div class="expand-item-wrap">
+          <label class="expand-item-header">
+            <input type="checkbox" name="chk_impact" value="邊坡位移與構造損壞" onchange="toggleDescBox(this, 'box_impact_slope')">
+            <span>2. 邊坡位移與構造損壞</span>
+          </label>
+          <div class="expand-desc-box" id="box_impact_slope">
+            <input type="text" id="note_impact_slope" placeholder="描述：地表開裂、擋土牆受損位移、建物龜裂等">
+          </div>
+        </div>
+        <div class="expand-item-wrap">
+          <label class="expand-item-header">
+            <input type="checkbox" name="chk_impact" value="聯外交通與生活機能中斷" onchange="toggleDescBox(this, 'box_impact_life')">
+            <span>3. 聯外交通與生活機能影響</span>
+          </label>
+          <div class="expand-desc-box" id="box_impact_life">
+            <input type="text" id="note_impact_life" placeholder="描述：道路中斷__天、水電中斷、曾配合撤離等">
+          </div>
         </div>
       </div>
 
       <div class="form-group">
         <label>居民口述受災詳細過程：</label>
-        <textarea id="interviewDetail" rows="3" placeholder="例如：七二水災時土石流由後方溪溝衝出漫過路面，淹水深約50公分..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>對既有水保工程治理成效之感受：</label>
-        <textarea id="engineeringFeedback" rows="3" placeholder="例如：防砂壩與系列固床工完成後，近年颱風已無土砂溢流至住家前方，感到較為安心..."></textarea>
+        <textarea id="interviewDetail" rows="3" placeholder="詳細記錄受訪者陳述之土石流流向、崩塌發生的徵兆、近年溪流整治前後之變化感受..."></textarea>
       </div>
     </div>
 
-    <!-- 3. 照片紀錄 -->
+    <!-- 3. 設施成效評估 (移植自舊版結構化單選) -->
+    <div class="panel-card">
+      <div class="panel-title">■ 既有水保與防砂設施成效評估 (受訪者感受)</div>
+      <div class="form-group">
+        <label>針對上游或周邊已完工水土保持與防砂工程（梳子壩、沉砂池、護岸等）：</label>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:6px;">
+          <label class="choice-item">
+            <input type="radio" name="engineeringFeedback" value="成效極為顯著，工程完工後歷次豪雨皆無再受災，安全感明顯提升">
+            <span><b>成效極為顯著：</b>工程完工後歷次豪雨皆無再受災，安全感明顯提升</span>
+          </label>
+          <label class="choice-item">
+            <input type="radio" name="engineeringFeedback" value="稍有改善，但豪雨時局部斷面仍有漫淹或沖刷疑慮">
+            <span><b>稍有改善：</b>但豪雨時局部斷面仍有漫淹或沖刷疑慮</span>
+          </label>
+          <label class="choice-item">
+            <input type="radio" name="engineeringFeedback" value="成效有限 / 設施有淤滿、局部損壞或清疏不及情形">
+            <span><b>成效有限：</b>設施有淤滿、局部損壞或清疏不及情形</span>
+          </label>
+          <label class="choice-item">
+            <input type="radio" name="engineeringFeedback" value="周邊未見顯著整治工程 / 不清楚工程位置">
+            <span><b>不清楚／未見工程：</b>周邊未見顯著整治工程或不清楚位置</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 照片紀錄 -->
     <div class="panel-card">
       <div class="panel-title">■ 現場訪談與環境照片紀錄</div>
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -327,7 +375,7 @@
     <!-- 操作按鈕 -->
     <div class="action-panel">
       <button type="button" class="btn-act btn-save" onclick="saveCurrentInterview()">💾 存檔並訪談下一戶</button>
-      <button type="button" class="btn-act btn-sync" onclick="syncCurrentToCloud()">☁️️ 同步本戶至雲端</button>
+      <button type="button" class="btn-act btn-sync" onclick="syncCurrentToCloud()">☁️ 同步本戶至雲端</button>
     </div>
 
   </div>
@@ -427,8 +475,20 @@
       </div>
       <div class="col form-group"><label>年資起算：</label><input type="text" id="edit_startYear"></div>
     </div>
+    <div class="form-group">
+      <label>現場受災衝擊描述：</label>
+      <input type="text" id="edit_impactSummary">
+    </div>
     <div class="form-group"><label>受災詳細過程：</label><textarea id="edit_interviewDetail" rows="3"></textarea></div>
-    <div class="form-group"><label>工程成效感受：</label><textarea id="edit_engineeringFeedback" rows="3"></textarea></div>
+    <div class="form-group">
+      <label>既有工程成效感受：</label>
+      <select id="edit_engineeringFeedback">
+        <option value="成效極為顯著，工程完工後歷次豪雨皆無再受災，安全感明顯提升">成效極為顯著，工程完工後歷次豪雨皆無再受災，安全感明顯提升</option>
+        <option value="稍有改善，但豪雨時局部斷面仍有漫淹或沖刷疑慮">稍有改善，但豪雨時局部斷面仍有漫淹或沖刷疑慮</option>
+        <option value="成效有限 / 設施有淤滿、局部損壞或清疏不及情形">成效有限 / 設施有淤滿、局部損壞或清疏不及情形</option>
+        <option value="周邊未見顯著整治工程 / 不清楚工程位置">周邊未見顯著整治工程 / 不清楚工程位置</option>
+      </select>
+    </div>
     <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
       <button type="button" class="btn-brush" onclick="closeEditModal()">取消</button>
       <button type="button" class="btn-act btn-save" style="min-width:120px;" onclick="saveEditedRecordToCloud()">💾 儲存並同步更新至雲端</button>
@@ -453,7 +513,7 @@
 
 <script>
   // 請填入您發布的 Google Web App URL
-  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyWkAQuKducGBfzemEEURSelshYngqnio9y5LsgApot6oyEnnYoGsX1qxhukOl0C384/exec";
+  const GAS_API_URL = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYED_URL_HERE/exec";
 
   let photoList = [];
   let currentRecordId = null;
@@ -496,6 +556,12 @@
       const tx = db.transaction(DB_STORE, "readwrite");
       tx.objectStore(DB_STORE).delete(recordId);
     } catch(e){}
+  }
+
+  function toggleDescBox(chk, boxId) {
+    const box = document.getElementById(boxId);
+    if (box) box.style.display = chk.checked ? "block" : "none";
+    autoSaveDraft();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -576,6 +642,14 @@
   }
 
   function collectFormData(recordId) {
+    const impactArr = Array.from(document.querySelectorAll("input[name='chk_impact']:checked")).map(el => {
+      let val = el.value;
+      if (val === "土砂溢淹與淤積" && document.getElementById("note_impact_sand")?.value) val += `【${document.getElementById("note_impact_sand").value}】`;
+      if (val === "邊坡位移與構造損壞" && document.getElementById("note_impact_slope")?.value) val += `【${document.getElementById("note_impact_slope").value}】`;
+      if (val === "聯外交通與生活機能中斷" && document.getElementById("note_impact_life")?.value) val += `【${document.getElementById("note_impact_life").value}】`;
+      return val;
+    });
+
     return {
       id: recordId,
       projectName: document.getElementById("projectName").value,
@@ -595,9 +669,14 @@
       startYear: document.getElementById("startYear").value,
       disasterHistory: Array.from(document.querySelectorAll("input[name='chk_disaster']:checked")).map(e => e.value).join("；"),
       disasterNote: document.getElementById("disasterNote").value,
-      impactSummary: Array.from(document.querySelectorAll("input[name='chk_impact']:checked")).map(e => e.value).join("；"),
+      impactSummary: impactArr.join("；"),
       interviewDetail: document.getElementById("interviewDetail").value,
-      engineeringFeedback: document.getElementById("engineeringFeedback").value
+      engineeringFeedback: document.querySelector("input[name='engineeringFeedback']:checked")?.value || "",
+      notes: {
+        sand: document.getElementById("note_impact_sand")?.value || "",
+        slope: document.getElementById("note_impact_slope")?.value || "",
+        life: document.getElementById("note_impact_life")?.value || ""
+      }
     };
   }
 
@@ -633,9 +712,19 @@
     document.getElementById("startYear").value = "";
     document.getElementById("disasterNote").value = "";
     document.getElementById("interviewDetail").value = "";
-    document.getElementById("engineeringFeedback").value = "";
 
     document.querySelectorAll("input[type='radio'], input[type='checkbox']").forEach(e => e.checked = false);
+    
+    // 重設舊版移植過來的輸入項與展開框
+    ["note_impact_sand", "note_impact_slope", "note_impact_life"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    ["box_impact_sand", "box_impact_slope", "box_impact_life"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+
     photoList = [];
     renderPhotos();
     document.getElementById("currentEditingIndicator").innerText = "📝 填報新受訪對象";
@@ -670,7 +759,6 @@
     document.getElementById("startYear").value = record.startYear || "";
     document.getElementById("disasterNote").value = record.disasterNote || "";
     document.getElementById("interviewDetail").value = record.interviewDetail || "";
-    document.getElementById("engineeringFeedback").value = record.engineeringFeedback || "";
 
     if (record.landRight) {
       const rad = document.querySelector(`input[name='landRight'][value='${record.landRight}']`);
@@ -681,16 +769,40 @@
       if (rad) rad.checked = true;
     }
 
+    if (record.engineeringFeedback) {
+      const efRad = document.querySelector(`input[name='engineeringFeedback'][value='${record.engineeringFeedback}']`);
+      if (efRad) efRad.checked = true;
+    }
+
     document.querySelectorAll("input[name='chk_disaster']").forEach(e => e.checked = false);
     (record.disasterHistory || "").split("；").forEach(val => {
       const chk = document.querySelector(`input[name='chk_disaster'][value='${val}']`);
       if (chk) chk.checked = true;
     });
 
+    // 載入衝擊項目與展開備註
     document.querySelectorAll("input[name='chk_impact']").forEach(e => e.checked = false);
-    (record.impactSummary || "").split("；").forEach(val => {
-      const chk = document.querySelector(`input[name='chk_impact'][value='${val}']`);
-      if (chk) chk.checked = true;
+    ["box_impact_sand", "box_impact_slope", "box_impact_life"].forEach(id => document.getElementById(id).style.display = "none");
+    
+    if (record.notes) {
+      if (document.getElementById("note_impact_sand")) document.getElementById("note_impact_sand").value = record.notes.sand || "";
+      if (document.getElementById("note_impact_slope")) document.getElementById("note_impact_slope").value = record.notes.slope || "";
+      if (document.getElementById("note_impact_life")) document.getElementById("note_impact_life").value = record.notes.life || "";
+    }
+
+    (record.impactSummary || "").split("；").forEach(item => {
+      if (item.includes("土砂溢淹與淤積")) {
+        const chk = document.querySelector("input[name='chk_impact'][value='土砂溢淹與淤積']");
+        if (chk) { chk.checked = true; document.getElementById("box_impact_sand").style.display = "block"; }
+      }
+      if (item.includes("邊坡位移與構造損壞")) {
+        const chk = document.querySelector("input[name='chk_impact'][value='邊坡位移與構造損壞']");
+        if (chk) { chk.checked = true; document.getElementById("box_impact_slope").style.display = "block"; }
+      }
+      if (item.includes("聯外交通與生活機能中斷")) {
+        const chk = document.querySelector("input[name='chk_impact'][value='聯外交通與生活機能中斷']");
+        if (chk) { chk.checked = true; document.getElementById("box_impact_life").style.display = "block"; }
+      }
     });
 
     photoList = await getPhotosFromDB(record.id);
@@ -841,7 +953,7 @@
     closeLocalListModal();
   }
 
-  // 刷新雲端資料：加入後台防呆過濾
+  // 刷新雲端資料：嚴格過濾空白紀錄
   async function fetchCloudData() {
     const container = document.getElementById("cloudRecordsContainer");
     container.innerHTML = "<p style='text-align:center;'>正在抓取雲端訪談紀錄...</p>";
@@ -849,7 +961,6 @@
       const res = await fetch(GAS_API_URL);
       const result = await res.json();
       const list = result.records || [];
-      // 排除無姓名或空白列
       globalCloudRecords = list.filter(r => r.interviewee && r.interviewee.trim() !== "");
       renderCloudDashboard();
     } catch(e) {
@@ -860,7 +971,6 @@
   }
 
   function renderCloudDashboard() {
-    // 雙重過濾空白資料
     globalCloudRecords = globalCloudRecords.filter(r => r.interviewee && r.interviewee.trim() !== "");
 
     document.getElementById("statTotalCount").innerText = globalCloudRecords.length;
@@ -914,8 +1024,9 @@
     document.getElementById("edit_landRightNote").value = r.landRightNote || "";
     document.getElementById("edit_targetType").value = r.targetType || "住宅/聚落住戶";
     document.getElementById("edit_startYear").value = r.startYear || "";
+    document.getElementById("edit_impactSummary").value = r.impactSummary || "";
     document.getElementById("edit_interviewDetail").value = r.interviewDetail || "";
-    document.getElementById("edit_engineeringFeedback").value = r.engineeringFeedback || "";
+    document.getElementById("edit_engineeringFeedback").value = r.engineeringFeedback || "成效極為顯著，工程完工後歷次豪雨皆無再受災，安全感明顯提升";
     document.getElementById("editModal").style.display = "flex";
   }
 
@@ -935,6 +1046,7 @@
     r.landRightNote = document.getElementById("edit_landRightNote").value;
     r.targetType = document.getElementById("edit_targetType").value;
     r.startYear = document.getElementById("edit_startYear").value;
+    r.impactSummary = document.getElementById("edit_impactSummary").value;
     r.interviewDetail = document.getElementById("edit_interviewDetail").value;
     r.engineeringFeedback = document.getElementById("edit_engineeringFeedback").value;
 
@@ -985,7 +1097,7 @@
         <tr><td style="padding:6px; border:1px solid #ddd; background:#f4f1eb;"><b>歷次重大災害</b></td><td colspan="3" style="padding:6px; border:1px solid #ddd;">${r.disasterHistory || "無"} (${r.disasterNote || ""})</td></tr>
         <tr><td style="padding:6px; border:1px solid #ddd; background:#f4f1eb;"><b>現場受災衝擊</b></td><td colspan="3" style="padding:6px; border:1px solid #ddd;">${r.impactSummary || "無"}</td></tr>
         <tr><td style="padding:6px; border:1px solid #ddd; background:#f4f1eb;"><b>口述受災詳細</b></td><td colspan="3" style="padding:6px; border:1px solid #ddd;">${r.interviewDetail || "無"}</td></tr>
-        <tr><td style="padding:6px; border:1px solid #ddd; background:#f4f1eb;"><b>工程治理成效</b></td><td colspan="3" style="padding:6px; border:1px solid #ddd;">${r.engineeringFeedback || "無"}</td></tr>
+        <tr><td style="padding:6px; border:1px solid #ddd; background:#f4f1eb;"><b>既有水保工程成效評估</b></td><td colspan="3" style="padding:6px; border:1px solid #ddd;">${r.engineeringFeedback || "未填寫"}</td></tr>
       </table>
       <b>📸 現場訪談照片：</b>
       <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px; margin-top:6px;">
@@ -997,6 +1109,7 @@
 
   function closeDetailModal() { document.getElementById("detailModal").style.display = "none"; }
 
+  // 下載 Word (.doc) 檔
   function downloadInterviewWord() {
     if (!currentViewingRecord) return alert("查無當前訪談資料！");
     const r = currentViewingRecord;
@@ -1033,7 +1146,7 @@
           <tr><th>經歷重大災害</th><td colspan="3">${r.disasterHistory || "無"} ${r.disasterNote ? "("+r.disasterNote+")" : ""}</td></tr>
           <tr><th>現場受災衝擊</th><td colspan="3">${r.impactSummary || "無"}</td></tr>
           <tr><th>受災詳細過程</th><td colspan="3">${r.interviewDetail || "無"}</td></tr>
-          <tr><th>工程成效感受</th><td colspan="3">${r.engineeringFeedback || "無"}</td></tr>
+          <tr><th>設施成效評估</th><td colspan="3">${r.engineeringFeedback || "未填寫"}</td></tr>
           <tr><th>GPS 座標</th><td colspan="3">X (經度): ${r.coordX || "-"} , Y (緯度): ${r.coordY || "-"}</td></tr>
         </table>
         <h3 style="font-family:'標楷體'; margin-top:16px;">訪談現場照片記錄：</h3>
