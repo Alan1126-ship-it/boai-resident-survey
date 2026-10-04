@@ -128,7 +128,6 @@
     }
     .btn-save { background: var(--btn-green); }
     .btn-sync { background: var(--btn-blue); }
-    .btn-csv  { background: #92588c; }
     .btn-danger-sm { background: var(--btn-danger); color: #fff; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.82rem; }
 
     .modal-backdrop {
@@ -328,7 +327,7 @@
     <!-- 操作按鈕 -->
     <div class="action-panel">
       <button type="button" class="btn-act btn-save" onclick="saveCurrentInterview()">💾 存檔並訪談下一戶</button>
-      <button type="button" class="btn-act btn-sync" onclick="syncCurrentToCloud()">☁️ 同步本戶至雲端</button>
+      <button type="button" class="btn-act btn-sync" onclick="syncCurrentToCloud()">☁️️ 同步本戶至雲端</button>
     </div>
 
   </div>
@@ -338,7 +337,7 @@
     <div id="adminAuthBox" class="panel-card" style="max-width:440px; margin:40px auto; text-align:center;">
       <h3 style="margin-top:0;">🔒 管理員驗證</h3>
       <input type="password" id="adminPwdInput" placeholder="請輸入管理員密碼" style="text-align:center; font-size:1.1rem; letter-spacing:3px; margin-bottom:14px;">
-      <button type="button" class="btn-act btn-save" style="width:100%;" onclick="verifyAdminPwd()">解鎖後台</button>
+      <button type="button" class="btn-act btn-save" style="width:100%;" onclick="verifyAdminPwd()">解鎖進入後台</button>
     </div>
 
     <div id="adminDashboard" style="display:none;">
@@ -519,7 +518,7 @@
     document.getElementById(tabId).classList.add("active");
   }
 
-  // ================= 安全密碼驗證 (與 Google Sheets 雲端連動) =================
+  // ================= 密碼驗證 (與 Google Sheets 雲端連動) =================
   async function verifyAdminPwd() {
     const pwdInput = document.getElementById("adminPwdInput").value.trim();
     if (!pwdInput) return alert("請輸入密碼！");
@@ -539,7 +538,7 @@
         alert("密碼錯誤，請重新輸入！");
       }
     } catch (e) {
-      alert("驗證失敗，請檢查網路連線或 API 網址設定！");
+      alert("驗證連線失敗，請檢查網路或 API 網址設定！");
     }
   }
 
@@ -842,29 +841,36 @@
     closeLocalListModal();
   }
 
+  // 刷新雲端資料：加入後台防呆過濾
   async function fetchCloudData() {
     const container = document.getElementById("cloudRecordsContainer");
     container.innerHTML = "<p style='text-align:center;'>正在抓取雲端訪談紀錄...</p>";
     try {
       const res = await fetch(GAS_API_URL);
       const result = await res.json();
-      globalCloudRecords = result.records || [];
+      const list = result.records || [];
+      // 排除無姓名或空白列
+      globalCloudRecords = list.filter(r => r.interviewee && r.interviewee.trim() !== "");
       renderCloudDashboard();
     } catch(e) {
-      globalCloudRecords = JSON.parse(localStorage.getItem("ALL_INTERVIEW_RECORDS") || "[]");
+      let localAll = JSON.parse(localStorage.getItem("ALL_INTERVIEW_RECORDS") || "[]");
+      globalCloudRecords = localAll.filter(r => r.interviewee && r.interviewee.trim() !== "");
       renderCloudDashboard();
     }
   }
 
   function renderCloudDashboard() {
+    // 雙重過濾空白資料
+    globalCloudRecords = globalCloudRecords.filter(r => r.interviewee && r.interviewee.trim() !== "");
+
     document.getElementById("statTotalCount").innerText = globalCloudRecords.length;
-    document.getElementById("stat003Count").innerText = globalCloudRecords.filter(r => r.streamName.includes("中-003")).length;
-    document.getElementById("stat004Count").innerText = globalCloudRecords.filter(r => r.streamName.includes("中-004")).length;
+    document.getElementById("stat003Count").innerText = globalCloudRecords.filter(r => (r.streamName || "").includes("中-003")).length;
+    document.getElementById("stat004Count").innerText = globalCloudRecords.filter(r => (r.streamName || "").includes("中-004")).length;
 
     const container = document.getElementById("cloudRecordsContainer");
     container.innerHTML = "";
     if (!globalCloudRecords.length) {
-      container.innerHTML = "<p style='text-align:center; color:#888;'>尚無雲端訪談資料</p>";
+      container.innerHTML = "<p style='text-align:center; color:#888;'>尚無有效雲端訪談資料</p>";
       return;
     }
 
@@ -875,7 +881,7 @@
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #ede4d6; padding-bottom:6px;">
           <div>
-            <b>${idx+1}. ${r.interviewee}</b> (${r.streamName})
+            <b>${idx+1}. ${r.interviewee}</b> (${r.streamName || "未指定溪流"})
             <span style="font-size:0.8rem; background:#eee; padding:2px 6px; border-radius:4px; margin-left:6px;">${r.targetType || "住戶"}</span>
           </div>
           <div style="display:flex; gap:6px;">
