@@ -94,7 +94,7 @@
 
     .form-group { margin-bottom: 14px; }
     label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.92rem; color: #44372e; }
-    input[type="text"], input[type="date"], select, textarea {
+    input[type="text"], input[type="date"], input[type="password"], select, textarea {
       width: 100%; padding: 10px 14px; border: 1px solid #d7cbbb; border-radius: 8px;
       font-size: 0.95rem; font-family: var(--font-serif-tc); background: #fbf9f4;
       color: var(--oil-charcoal); outline: none; transition: all 0.2s;
@@ -156,7 +156,7 @@
 
   <div class="palette-nav">
     <button class="palette-tab-btn active" onclick="switchMainTab('surveyTab')">📝 訪談紀錄填報</button>
-    <button class="palette-tab-btn" onclick="switchMainTab('adminTab')">🏛️ 訪談成果庫 (密碼 9999)</button>
+    <button class="palette-tab-btn" onclick="switchMainTab('adminTab')">🏛️ 訪談成果庫</button>
   </div>
 
   <!-- ================= 分頁 1：訪談紀錄填報 ================= -->
@@ -333,18 +333,21 @@
 
   </div>
 
-  <!-- ================= 分頁 2：訪談成果庫 (密碼 9999) ================= -->
+  <!-- ================= 分頁 2：訪談成果庫 ================= -->
   <div id="adminTab" class="tab-content">
     <div id="adminAuthBox" class="panel-card" style="max-width:440px; margin:40px auto; text-align:center;">
       <h3 style="margin-top:0;">🔒 管理員驗證</h3>
-      <input type="password" id="adminPwdInput" placeholder="請輸入密碼 (9999)" style="text-align:center; font-size:1.2rem; letter-spacing:4px; margin-bottom:14px;">
+      <input type="password" id="adminPwdInput" placeholder="請輸入管理員密碼" style="text-align:center; font-size:1.1rem; letter-spacing:3px; margin-bottom:14px;">
       <button type="button" class="btn-act btn-save" style="width:100%;" onclick="verifyAdminPwd()">解鎖後台</button>
     </div>
 
     <div id="adminDashboard" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;">
         <h2 style="font-size:1.25rem; margin:0;">📊 保全對象訪談成果總覽</h2>
-        <button type="button" class="btn-brush" onclick="fetchCloudData()">🔄 刷新雲端資料</button>
+        <div>
+          <button type="button" class="btn-brush" onclick="fetchCloudData()">🔄 刷新雲端資料</button>
+          <button type="button" class="btn-brush" style="background:#5c768d; color:#fff;" onclick="openChangePwdModal()">🔑 修改管理員密碼</button>
+        </div>
       </div>
 
       <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
@@ -434,14 +437,29 @@
   </div>
 </div>
 
+<!-- 修改密碼彈窗 -->
+<div class="modal-backdrop" id="changePwdModal">
+  <div class="modal" style="max-width:380px;">
+    <h3 style="margin-top:0;">🔑 修改管理員密碼</h3>
+    <div class="form-group">
+      <label>請輸入新密碼：</label>
+      <input type="text" id="newAdminPwd" placeholder="輸入自訂新密碼">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+      <button type="button" class="btn-brush" onclick="closeChangePwdModal()">取消</button>
+      <button type="button" class="btn-act btn-save" onclick="submitChangePwd()">確認更新</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // 請填入您發布的 Google Web App URL
-  const GAS_API_URL = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYED_URL_HERE/exec";
+  const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyWkAQuKducGBfzemEEURSelshYngqnio9y5LsgApot6oyEnnYoGsX1qxhukOl0C384/exec";
 
   let photoList = [];
   let currentRecordId = null;
   let globalCloudRecords = [];
-  let currentViewingRecord = null; // 供 Word 匯出使用
+  let currentViewingRecord = null;
 
   const DB_NAME = "InterviewPhotoDB", DB_STORE = "records_photos";
 
@@ -501,13 +519,52 @@
     document.getElementById(tabId).classList.add("active");
   }
 
-  function verifyAdminPwd() {
-    if (document.getElementById("adminPwdInput").value.trim() === "9999") {
-      document.getElementById("adminAuthBox").style.display = "none";
-      document.getElementById("adminDashboard").style.display = "block";
-      fetchCloudData();
-    } else {
-      alert("密碼錯誤！請輸入 9999。");
+  // ================= 安全密碼驗證 (與 Google Sheets 雲端連動) =================
+  async function verifyAdminPwd() {
+    const pwdInput = document.getElementById("adminPwdInput").value.trim();
+    if (!pwdInput) return alert("請輸入密碼！");
+
+    try {
+      const res = await fetch(GAS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "VERIFY_ADMIN_PWD", password: pwdInput })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        document.getElementById("adminAuthBox").style.display = "none";
+        document.getElementById("adminDashboard").style.display = "block";
+        fetchCloudData();
+      } else {
+        alert("密碼錯誤，請重新輸入！");
+      }
+    } catch (e) {
+      alert("驗證失敗，請檢查網路連線或 API 網址設定！");
+    }
+  }
+
+  function openChangePwdModal() { document.getElementById("changePwdModal").style.display = "flex"; }
+  function closeChangePwdModal() { document.getElementById("changePwdModal").style.display = "none"; }
+
+  async function submitChangePwd() {
+    const newPwd = document.getElementById("newAdminPwd").value.trim();
+    if (!newPwd) return alert("請輸入新密碼！");
+
+    try {
+      const res = await fetch(GAS_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "UPDATE_ADMIN_PWD", newPassword: newPwd })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        alert("✅ 管理員密碼已成功更新至 Google Sheets 試算表！");
+        closeChangePwdModal();
+      } else {
+        alert("更新失敗：" + data.message);
+      }
+    } catch(e) {
+      alert("連線更新失敗：" + e.message);
     }
   }
 
@@ -645,7 +702,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // ================= 刪除本機案件功能 =================
   async function deleteLocalRecord(recordId, name) {
     if (!confirm(`⚠️ 確定要刪除「${name}」的訪談資料嗎？\n刪除後此筆紀錄與其照片將自本機永久移除，不再上傳！`)) return;
 
@@ -701,7 +757,6 @@
     document.getElementById("recordCountBadge").innerText = all.length;
   }
 
-  // 照片處理
   function handlePhotoUpload(input) {
     Array.from(input.files).forEach(file => {
       const reader = new FileReader();
@@ -749,7 +804,6 @@
     }, err => alert("定位失敗: " + err.message));
   }
 
-  // 同步上傳至 Google 雲端
   async function syncCurrentToCloud() {
     const name = document.getElementById("interviewee").value.trim();
     if (!name) return alert("請先填寫受訪者姓名！");
@@ -757,12 +811,17 @@
     data.photos = photoList;
 
     try {
-      await fetch(GAS_API_URL, {
-        method: "POST", mode: "no-cors",
+      const res = await fetch(GAS_API_URL, {
+        method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(data)
       });
-      alert(`🎉 恭喜！「${data.interviewee}」訪談紀錄已同步至 Google 雲端！`);
+      const result = await res.json();
+      if (result.status === "success") {
+        alert(`🎉 恭喜！「${data.interviewee}」訪談紀錄已同步至 Google 雲端！`);
+      } else {
+        alert("同步出錯：" + result.message);
+      }
     } catch(e) { alert("同步失敗: " + e.message); }
   }
 
@@ -774,7 +833,7 @@
     for (let r of all) {
       r.photos = await getPhotosFromDB(r.id);
       await fetch(GAS_API_URL, {
-        method: "POST", mode: "no-cors",
+        method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(r)
       });
@@ -783,7 +842,6 @@
     closeLocalListModal();
   }
 
-  // 後台數據管理
   async function fetchCloudData() {
     const container = document.getElementById("cloudRecordsContainer");
     container.innerHTML = "<p style='text-align:center;'>正在抓取雲端訪談紀錄...</p>";
@@ -837,7 +895,6 @@
     });
   }
 
-  // ================= 後台在線修改內容並同步雲端 =================
   function openEditModal(recordId) {
     const r = globalCloudRecords.find(x => String(x.id).trim() === String(recordId).trim());
     if (!r) return;
@@ -876,20 +933,24 @@
     r.engineeringFeedback = document.getElementById("edit_engineeringFeedback").value;
 
     try {
-      await fetch(GAS_API_URL, {
-        method: "POST", mode: "no-cors",
+      const res = await fetch(GAS_API_URL, {
+        method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(r)
       });
-      alert(`✅ 已成功更新「${r.interviewee}」的訪談內容並同步至 Google 試算表！`);
-      closeEditModal();
-      renderCloudDashboard();
+      const result = await res.json();
+      if (result.status === "success") {
+        alert(`✅ 已成功更新「${r.interviewee}」的訪談內容並同步至 Google 試算表！`);
+        closeEditModal();
+        renderCloudDashboard();
+      } else {
+        alert("更新出錯：" + result.message);
+      }
     } catch(e) {
       alert("更新失敗: " + e.message);
     }
   }
 
-  // ================= 查看訪談卡與下載 Word =================
   async function viewDetailCard(recordId) {
     let r = globalCloudRecords.find(x => String(x.id).trim() === String(recordId).trim());
     if (!r) return;
@@ -930,7 +991,6 @@
 
   function closeDetailModal() { document.getElementById("detailModal").style.display = "none"; }
 
-  // ================= 匯出直接可用的 Word (.doc) 表格檔 =================
   function downloadInterviewWord() {
     if (!currentViewingRecord) return alert("查無當前訪談資料！");
     const r = currentViewingRecord;
